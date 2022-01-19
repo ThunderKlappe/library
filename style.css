@@ -1,0 +1,129 @@
+body{
+    box-sizing: border-box;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #F4DFBA;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+#header{
+    height: 72px;
+    background-color: #CA965C;
+    color: #2C3531;
+    font-size: 32px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    padding-left: 60px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+#content{
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#book-counts{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 40px;
+    padding-bottom: 10px;
+    color: #2C3531;
+    font-size: 24px;
+    font-weight: 600;
+}
+#library-buttons{
+    padding-top: 10px;
+    display: flex;
+    gap: 10px 40px;
+}
+
+button{
+    border-style: solid;
+    border-width: 2px;
+    border-color: #2C3531;
+    border-radius: 30px;
+    
+}
+.add-button{
+    background-color: #B4C6A6;
+}
+.add-button:hover{
+    background-color: #99ad8a;
+}
+.add-button:active{
+    background-color: #889c78;
+}
+.delete-button{
+    background-color: #ff9b9b;
+}
+.delete-button:hover{
+    background-color: #e78080;
+}
+.delete-button:active{
+    background-color: #da7070;
+}
+#library-buttons button {
+    font-size: 18px;
+    padding: 8px 15px;
+}
+#library-container{
+    display: flex;
+    flex-wrap: wrap;
+    width: -webkit-fill-available;
+}
+
+.book-card{
+    display: flex;
+    flex-direction: column;
+    background-color: #876445;
+    color: #EEC373;
+    border-radius: 30px;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #EEC373;
+    padding: 20px;
+    margin: 40px 0px 0px 40px;
+    min-height: 275px;
+    width: 300px;
+    justify-content: space-between;
+}
+.book-header{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-wrap: normal;
+}
+.book-title{
+    font-size: 30px;
+    font-weight: 700;
+    text-decoration: underline;
+}
+.book-author{
+    font-size: 22px;
+    font-weight: 500;
+    font-style: italic;
+}
+.book-details{
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    gap: 15px;
+    padding-top: 15px;
+}
+.book-rating{
+    font-size: 26px;
+}
+.book-buttons{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+.book-button{
+    font-size: 16px;
+    padding: 5px;
+    width: 125px;
+}
