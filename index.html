@@ -178,5 +178,28 @@
     </div>
     
     <script src="script.js"></script>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Add a Book</div>
+            <div class="book-info">
+                <div class="new-info-container">
+                    <label for="new-book-title">Book Title: </label>
+                    <input type="text" id="new-book-title" name="new-book-title">
+                </div>
+                <div class="new-info-container">
+                    <label for="new-book-author">Author: </label>
+                    <input type="text" id="new-book-author" name="new-book-author">
+                </div>
+                <div class="new-info-container">
+                    <label for="new-book-pages">Pages: </label>
+                    <input type="number" id="new-book-pages" name="new-book-pages">
+                </div>
+                <div class="book-buttons">
+                    <button id="confirm-add-book" class="add-button">Add</button>
+                    <button id="cancel-add-book" class="delete-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
