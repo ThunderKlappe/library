@@ -1,15 +1,16 @@
 let myLibrary = [];
 //get starting elements
 const totalBooksLabel = document.querySelector("#total-books");
-const totalUnreadLabel = document.querySelector("#unread-books");
-const totalReadLabel = document.querySelector("#read-books");
+const unreadBooksLabel = document.querySelector("#unread-books");
+const readBooksLabel = document.querySelector("#read-books");
 const averageRatingLabel = document.querySelector("#avg-rating");
+const libraryContainer = document.querySelector("#library-container");
 
 const addButton = document.querySelector("#add-book");
 const clearButton = document.querySelector("#clear-library");
 
-//define modal HTML code
-const newBookHTML = `
+//define block HTML code
+const newBookModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Add a Book</div>
         <div class="book-info">
@@ -32,11 +33,13 @@ const newBookHTML = `
         </div>
     </div>`;
 
-
+let totalBooks = 0;
+let unreadBooks = 0;
+let readBooks = 0;
 
 //event listeners to starting buttons
 addButton.addEventListener('click', newBookModal);
-clearButton.addEventListener('click', clearLibraryModal);
+//clearButton.addEventListener('click', clearLibraryModal);
 
 
 
@@ -44,18 +47,43 @@ clearButton.addEventListener('click', clearLibraryModal);
 //*******Functions*******
 
 //this is the constructor to the book object
-function Book(title, author, pages, completed=undefined, rating=undefined){
+function Book(title, author, pages, completed="Not Yet Completed", rating=''){
     this.title = title;
     this.author = author;
     this.pages = pages;
     this.completed = completed;
     this.rating = rating;
+}
 
+Book.prototype.newCard = function(){
+    let card = document.createElement('div');
+    card.classList.add('book-card');
+    card.innerHTML = `
+        <div class="book-upper">
+            <div class="book-header">
+                <div class="book-title">${this.title}</div>
+                <div class="book-author">${this.author}</div>
+            </div>
+            <div class="book-details">
+                <div class="book-pages">Pages: ${this.pages}</div>
+                <div class="book-completed">${this.completed}</div>
+                <div class="book-rating">${this.rating}</div>
+            </div>
+        </div>
+        <div class="book-buttons">
+            <button class="add-button book-button">Mark as Read</button>
+            <button class="delete-button book-button">Delete</button>
+        </div>`;
+    libraryContainer.appendChild(card);
+    totalBooks++;
+    unreadBooks++;
+    totalBooksLabel.textContent = `Total Books: ${totalBooks}`;
+    unreadBooksLabel.textContent = `Unread Books: ${unreadBooks}`;
 }
 
 //this function makes the New Book modal appear
 function newBookModal(){
-    makeModal(newBookHTML);
+    makeModal(newBookModalHTML);
     const addBookButton = document.querySelector("#confirm-add-book");
     addBookButton.addEventListener('click', addBook);
 }
@@ -95,28 +123,31 @@ function addBook(){
     let newAuthor = modal.querySelector('#new-book-author').value;
     let newPages = modal.querySelector('#new-book-pages').value;
 
+    //makes sure all fields have been put in
     if(newTitle == ''){
         let titleError = document.createElement('div');
         titleError.classList.add('error-message');
         titleError.textContent = 'Please enter the title of the book';
+        //this series of things adds the error message to right above the buttons
         modal.firstElementChild.lastElementChild.insertBefore(titleError, modal.firstElementChild.lastElementChild.lastElementChild);
     }if(newAuthor == ''){
         let authorError = document.createElement('div');
         authorError.classList.add('error-message');
         authorError.textContent = 'Please enter the author of the book';
         modal.firstElementChild.lastElementChild.insertBefore(authorError, modal.firstElementChild.lastElementChild.lastElementChild);
-
     }
     if(newPages == ''){
         let pagesError = document.createElement('div');
         pagesError.classList.add('error-message');
         pagesError.textContent = 'Please enter the amout of pages in of the book';
         modal.firstElementChild.lastElementChild.insertBefore(pagesError, modal.firstElementChild.lastElementChild.lastElementChild);
-
     }
     if(newTitle && newAuthor && newPages){
         let newBook = new Book(`${newTitle}`, `${newAuthor}`, `${newPages}`);
         myLibrary.push(newBook);
+        myLibrary[myLibrary.length-1].newCard();
         closeModal(modal);
     }
 }
+
+//this function adds a book to a card on the library display
