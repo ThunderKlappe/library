@@ -8,30 +8,72 @@ const libraryContainer = document.querySelector("#library-container");
 
 const addButton = document.querySelector("#add-book");
 const clearButton = document.querySelector("#clear-library");
+let readBookButtons;
+let deleteBookButtons;
 
 //define block HTML code
 const newBookModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Add a Book</div>
-        <div class="book-info">
-            <div class="new-info-container">
+        <div class="modal-info-container">
+            <div class="modal-info">
                 <label for="new-book-title">Book Title: </label>
                 <input type="text" id="new-book-title" name="new-book-title">
             </div>
-            <div class="new-info-container">
+            <div class="modal-info">
                 <label for="new-book-author">Author: </label>
                 <input type="text" id="new-book-author" name="new-book-author">
             </div>
-            <div class="new-info-container">
+            <div class="modal-info">
                 <label for="new-book-pages">Pages: </label>
                 <input type="number" id="new-book-pages" name="new-book-pages">
             </div>
             <div class="book-buttons">
                 <button id="confirm-add-book" class="add-button">Add</button>
-                <button id="cancel-add-book" class="delete-button">Cancel</button>
+                <button id="cancel-button" class="delete-button">Cancel</button>
             </div>
         </div>
     </div>`;
+
+const confirmReadModalHTML = `
+    <div class="modal-content">
+        <div class="modal-header">Mark this book as Read?</div>
+        <div class="modal-info-container">
+            <div class="modal-subtitle">I confirm I have read this book</div>
+            <div class="modal-info">Book Rating: 
+                <div class="rating">
+                    <input id="star5" name="star" type="radio" value="5" class="radio-btn hide" />
+                    <label for="star5" >☆</label>
+                    <input id="star4" name="star" type="radio" value="4" class="radio-btn hide" />
+                    <label for="star4" >☆</label>
+                    <input id="star3" name="star" type="radio" value="3" class="radio-btn hide" />
+                    <label for="star3" >☆</label>
+                    <input id="star2" name="star" type="radio" value="2" class="radio-btn hide" />
+                    <label for="star2" >☆</label>
+                    <input id="star1" name="star" type="radio" value="1" class="radio-btn hide" />
+                    <label for="star1" >☆</label>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+        <div class="book-buttons">
+            <button class="add-button" id="confirm-button">Confirm Read</button>
+            <button class="delete-button" id ="cancel-button">Cancel</button>
+        </div>
+    </div>`;
+
+const confirmUnreadModalHTML = `
+<div class="modal-content">
+        <div class="modal-header">Mark this book as Unread?</div>
+        <div class="modal-info-container">
+            <div class="modal-subtitle">I confirm I have not read this book</div>
+        </div>
+        <div class="book-buttons">
+            <button class="add-button" id="confirm-button">Confirm Unread</button>
+            <button class="delete-button" id ="cancel-button">Cancel</button>
+        </div>
+    </div>`;
+
 
 let totalBooks = 0;
 let unreadBooks = 0;
@@ -47,14 +89,14 @@ addButton.addEventListener('click', newBookModal);
 //*******Functions*******
 
 //this is the constructor to the book object
-function Book(title, author, pages, completed="Not Yet Completed", rating=''){
+function Book(title, author, pages, completed="Not Yet Completed", rating='', ratingNumber = ""){
     this.title = title;
     this.author = author;
     this.pages = pages;
     this.completed = completed;
     this.rating = rating;
+    this.ratingNumber = ratingNumber;
 }
-
 Book.prototype.newCard = function(){
     let card = document.createElement('div');
     card.classList.add('book-card');
@@ -71,54 +113,46 @@ Book.prototype.newCard = function(){
             </div>
         </div>
         <div class="book-buttons">
-            <button class="add-button book-button">Mark as Read</button>
-            <button class="delete-button book-button">Delete</button>
+            <button class="add-button">Mark as Read</button>
+            <button class="delete-button">Delete</button>
         </div>`;
-    libraryContainer.appendChild(card);
-    totalBooks++;
-    unreadBooks++;
-    totalBooksLabel.textContent = `Total Books: ${totalBooks}`;
-    unreadBooksLabel.textContent = `Unread Books: ${unreadBooks}`;
+    return card;
+
+}
+Book.prototype.markRead = function(){
+    let today = new Date();
+    this.completed = `Date Completed: ${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
+    this.rating = `Rating: `;
+    for(let i = 0; i<getStar(); i++){
+        this.rating += `&#9733`;
+    }
+    this.ratingNumber = getStar();
+}
+Book.prototype.markUnread = function(){
+    this.completed = "Not Yet Completed";
+    this.rating = "";
+    this.ratingNumber = "";
 }
 
-//this function makes the New Book modal appear
-function newBookModal(){
-    makeModal(newBookModalHTML);
-    const addBookButton = document.querySelector("#confirm-add-book");
-    addBookButton.addEventListener('click', addBook);
-}
+//******General Functions******
 
-//This funtion takes in the type of modal being made and creates it
-function makeModal(type){
-    let modal = document.createElement('div');
-    modal.classList.add("modal");
-    modal.setAttribute("id", "addModal")
-    modal.innerHTML = type;
-    document.body.appendChild(modal);
-    //needs timeout in order to create the modal and set the opacity to 0 before
-    //transitioning it for the animation
-    setTimeout(()=>activateModal(modal), 1);
+//this function returns which star is selected
+function getStar(){
+    let stars = document.querySelectorAll(".radio-btn");
+    let chosen; 
+    stars.forEach(star=>{
+        if(star.checked == true){
+            chosen = star.value;
+        }
+    })
+    return chosen;
 }
-
-//this function makes the modal visible
-function activateModal(modal){
-    modal.classList.add('modal-active');
-    let cancelModalButton = document.querySelector("#cancel-add-book");
-    cancelModalButton.addEventListener('click', ()=>closeModal(modal));
-}
-
-//this function closes a modal.
-function closeModal(modal){
-    modal.classList.remove('modal-active');
-    setTimeout( () => modal.remove(), 200);
-}
-
 //this function takes the data put into the new book modal and adds it to the book
 function addBook(){
     const errorMessages = document.querySelectorAll('.error-message');
     errorMessages.forEach(error => error.remove());
 
-    let modal = document.querySelector('#addModal')
+    let modal = document.querySelector('#my-modal')
     let newTitle = modal.querySelector('#new-book-title').value;
     let newAuthor = modal.querySelector('#new-book-author').value;
     let newPages = modal.querySelector('#new-book-pages').value;
@@ -145,9 +179,102 @@ function addBook(){
     if(newTitle && newAuthor && newPages){
         let newBook = new Book(`${newTitle}`, `${newAuthor}`, `${newPages}`);
         myLibrary.push(newBook);
-        myLibrary[myLibrary.length-1].newCard();
+        libraryContainer.appendChild(myLibrary[myLibrary.length-1].newCard());
+        updateCounts();
+        updateButtons();
         closeModal(modal);
     }
 }
 
-//this function adds a book to a card on the library display
+function toggleBook(index, read){
+    let modal = document.querySelector('#my-modal')
+    read == "read" ? myLibrary[index].markRead() : myLibrary[index].markUnread();
+    reloadAllCards();
+    readBookButtons = libraryContainer.querySelectorAll(".add-button");
+    myLibrary.forEach((book, bookNo) => (book.completed != "Not Yet Completed") ? 
+        readBookButtons[bookNo].textContent = "Unread": false);
+    updateButtons();
+    updateCounts();
+    closeModal(modal);
+}
+
+//******Modal Functions******
+
+//this function makes the New Book modal appear
+function newBookModal(){
+    makeModal(newBookModalHTML);
+    const addBookButton = document.querySelector("#confirm-add-book");
+    addBookButton.addEventListener('click', addBook);
+}
+
+//this function makes the confirm read modal appear
+function confirmReadModal(index){
+    makeModal(confirmReadModalHTML);
+    const readButton = document.querySelector("#confirm-button");
+    readButton.addEventListener('click', ()=> toggleBook(index, "read"));
+}
+//this functions makes the confirm unread modal
+function confirmUnreadModal(index){
+    makeModal(confirmUnreadModalHTML);
+    const unreadButton = document.querySelector("#confirm-button");
+    unreadButton.addEventListener('click', ()=> toggleBook(index, "unread"));
+}
+
+//This funtion takes in the type of modal being made and creates it
+function makeModal(type){
+    let modal = document.createElement('div');
+    modal.classList.add("modal");
+    modal.setAttribute("id", "my-modal")
+    modal.innerHTML = type;
+    document.body.appendChild(modal);
+    //needs timeout in order to create the modal and set the opacity to 0 before
+    //transitioning it for the animation
+    setTimeout(()=>activateModal(modal), 1);
+}
+
+//this function makes the modal visible
+function activateModal(modal){
+    modal.classList.add('modal-active');
+    let cancelModalButton = document.querySelector("#cancel-button");
+    cancelModalButton.addEventListener('click', ()=>closeModal(modal));
+}
+
+//this function closes a modal.
+function closeModal(modal){
+    modal.classList.remove('modal-active');
+    setTimeout( () => modal.remove(), 200);
+}
+
+//******Update Functions******
+
+//this function updates the book counts
+function updateCounts(){
+    totalBooks = myLibrary.length;
+    unreadBooks = 0;
+    readBooks = 0;
+    myLibrary.forEach(book => book.completed == "Not Yet Completed" ? unreadBooks++ : readBooks++)
+    totalBooksLabel.textContent = `Total Books: ${totalBooks}`;
+    unreadBooksLabel.textContent = `Unread Books: ${unreadBooks}`;
+    readBooksLabel.textContent = `Read Books: ${readBooks}`;
+}
+
+//This function makes sure the buttons have event listeners on them
+function updateButtons(){
+    readBookButtons = libraryContainer.querySelectorAll(".add-button");
+    readBookButtons.forEach((button, index) => {
+        if(button.getAttribute("listener") != "true"){
+            button.textContent == "Mark as Read" ? 
+                button.addEventListener('click', ()=>confirmReadModal(index)):
+                button.addEventListener('click', ()=>confirmUnreadModal(index));
+            button.setAttribute("listener","true");
+        }
+    });
+    deleteBookButtons = libraryContainer.querySelectorAll(".delete-button");
+}
+
+//This function removes all cards and then re-displays them with updated information
+function reloadAllCards(){
+    let cards = libraryContainer.querySelectorAll(".book-card")
+    cards.forEach(card=>card.remove());
+    myLibrary.forEach(book=>libraryContainer.appendChild(book.newCard()));
+}
