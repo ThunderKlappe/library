@@ -35,6 +35,10 @@ body{
     font-size: 24px;
     font-weight: 600;
 }
+#avg-rating{
+    display: flex;
+    gap: 10px;
+}
 #library-buttons{
     padding-top: 10px;
     display: flex;
@@ -268,6 +272,28 @@ input[type="number" i] {
     left: 0;
     color: #EEC373;
     text-shadow: -1px 1px 0 #2C3531;
+}
+
+/* This makes the average rating work */
+#stars-outer {
+    display: inline-block;
+    position: relative;
+} 
+#stars-outer::before {
+    content: "\2606 \2606 \2606 \2606 \2606";
+    color: #2C3531;
+} 
+#stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 0;
+}
+#stars-inner::before {
+    content: "\2605 \2605 \2605 \2605 \2605";
+    color: #eec373;
 }
 
 

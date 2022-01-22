@@ -89,7 +89,7 @@ addButton.addEventListener('click', newBookModal);
 //*******Functions*******
 
 //this is the constructor to the book object
-function Book(title, author, pages, completed="Not Yet Completed", rating='', ratingNumber = ""){
+function Book(title, author, pages, completed="Not Yet Completed", rating='', ratingNumber = 0){
     this.title = title;
     this.author = author;
     this.pages = pages;
@@ -197,7 +197,6 @@ function toggleBook(index, read){
     updateCounts();
     closeModal(modal);
 }
-
 //******Modal Functions******
 
 //this function makes the New Book modal appear
@@ -256,6 +255,21 @@ function updateCounts(){
     totalBooksLabel.textContent = `Total Books: ${totalBooks}`;
     unreadBooksLabel.textContent = `Unread Books: ${unreadBooks}`;
     readBooksLabel.textContent = `Read Books: ${readBooks}`;
+    updateRating();
+}
+
+//This function updates the average rating
+function updateRating(){
+    let maxStars = 5;
+    let totalRatings = myLibrary.reduce((total, book) => Number(total) + Number(book.ratingNumber) , 0);
+    let averageRating = totalRatings/readBooks;
+    let percentageRating = (averageRating/maxStars)*100;
+    let roundedPercentageRating = `${percentageRating.toFixed(2)}%`;
+    document.querySelector("#stars-inner").style.width = roundedPercentageRating;
+    if(percentageRating>0){
+        document.querySelector("#avg-rating-number").textContent = roundedPercentageRating; 
+    }
+
 }
 
 //This function makes sure the buttons have event listeners on them
