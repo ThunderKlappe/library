@@ -37,7 +37,7 @@ const newBookModalHTML = `
 
 const confirmReadModalHTML = `
     <div class="modal-content">
-        <div class="modal-header">Mark this book as Read?</div>
+        <div class="modal-header">Mark this book as Read</div>
         <div class="modal-info-container">
             <div class="modal-subtitle">I confirm I have read this book</div>
             <div class="modal-info">Book Rating: 
@@ -63,13 +63,25 @@ const confirmReadModalHTML = `
     </div>`;
 
 const confirmUnreadModalHTML = `
-<div class="modal-content">
-        <div class="modal-header">Mark this book as Unread?</div>
+    <div class="modal-content">
+        <div class="modal-header">Mark this book as Unread</div>
         <div class="modal-info-container">
             <div class="modal-subtitle">I confirm I have not read this book</div>
         </div>
         <div class="book-buttons">
             <button class="add-button" id="confirm-button">Confirm Unread</button>
+            <button class="delete-button" id ="cancel-button">Cancel</button>
+        </div>
+    </div>`;
+
+const clearLibraryModalHTML = `
+    <div class="modal-content">
+        <div class="modal-header">Clear Library</div>
+        <div class="modal-info-container">
+            <div class="modal-subtitle">Would you like to clear the entire library?</div>
+        </div>
+        <div class="book-buttons">
+            <button class="add-button" id="confirm-button">Clear Library</button>
             <button class="delete-button" id ="cancel-button">Cancel</button>
         </div>
     </div>`;
@@ -81,7 +93,7 @@ let readBooks = 0;
 
 //event listeners to starting buttons
 addButton.addEventListener('click', newBookModal);
-//clearButton.addEventListener('click', clearLibraryModal);
+clearButton.addEventListener('click', clearLibraryModal);
 
 
 
@@ -149,8 +161,7 @@ function getStar(){
 }
 //this function takes the data put into the new book modal and adds it to the book
 function addBook(){
-    const errorMessages = document.querySelectorAll('.error-message');
-    errorMessages.forEach(error => error.remove());
+    clearErrors();
 
     let modal = document.querySelector('#my-modal')
     let newTitle = modal.querySelector('#new-book-title').value;
@@ -187,16 +198,49 @@ function addBook(){
 }
 //This function toggles a book between read and unread
 function toggleBook(index, read){
+    clearErrors();
     let modal = document.querySelector('#my-modal')
-    read == "read" ? myLibrary[index].markRead() : myLibrary[index].markUnread();
-    reloadAllCards();
-    readBookButtons = libraryContainer.querySelectorAll(".add-button");
-    myLibrary.forEach((book, bookNo) => (book.completed != "Not Yet Completed") ? 
-        readBookButtons[bookNo].textContent = "Unread": false);
-    updateButtons();
-    updateCounts();
-    closeModal(modal);
+    if(read == "read" && getStar() == undefined)
+    {
+        let starError = document.createElement('div');
+        starError.classList.add('error-message');
+        starError.textContent = 'Please select a rating for this book';
+        modal.firstElementChild.insertBefore(starError, modal.firstElementChild.lastElementChild);
+    
+    }else{
+        read == "read" ? myLibrary[index].markRead() : myLibrary[index].markUnread();
+        reloadAllCards();
+        readBookButtons = libraryContainer.querySelectorAll(".add-button");
+        myLibrary.forEach((book, bookNo) => (book.completed != "Not Yet Completed") ? 
+            readBookButtons[bookNo].textContent = "Unread": false);
+        updateButtons();
+        updateCounts();
+        closeModal(modal);
+    }
 }
+//function clears the library of any books
+function clearLibrary(){
+    clearErrors();
+    let modal = document.querySelector('#my-modal')
+    if(myLibrary.length == 0){
+        let libraryError = document.createElement('div');
+        libraryError.classList.add('error-message');
+        libraryError.textContent = 'Your Library is already empty';
+        modal.firstElementChild.insertBefore(libraryError, modal.firstElementChild.lastElementChild);
+    }else{
+        myLibrary.splice(0,myLibrary.length);
+        reloadAllCards();
+        updateCounts();
+        closeModal(modal)
+    }
+}
+
+//this function clears error messages
+function clearErrors(){
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(error => error.remove());
+}
+
 //******Modal Functions******
 
 //this function makes the New Book modal appear
@@ -217,6 +261,12 @@ function confirmUnreadModal(index){
     makeModal(confirmUnreadModalHTML);
     const unreadButton = document.querySelector("#confirm-button");
     unreadButton.addEventListener('click', ()=> toggleBook(index, "unread"));
+}
+//this function makes the clear library modal
+function clearLibraryModal(){
+    makeModal(clearLibraryModalHTML);
+    const clearLibraryButton = document.querySelector("#confirm-button");
+    clearLibraryButton.addEventListener('click', clearLibrary);
 }
 
 //This funtion takes in the type of modal being made and creates it
@@ -262,10 +312,11 @@ function updateCounts(){
 function updateRating(){
     let maxStars = 5;
     let totalRatings = myLibrary.reduce((total, book) => Number(total) + Number(book.ratingNumber) , 0);
-    let averageRating = totalRatings/readBooks;
+    let averageRating = readBooks > 0 ? totalRatings/readBooks:0;
     let percentageRating = (averageRating/maxStars)*100;
     let roundedPercentageRating = `${percentageRating.toFixed(2)}%`;
     document.querySelector("#stars-inner").style.width = roundedPercentageRating;
+    document.querySelector("#avg-rating-number").textContent = ""
     if(percentageRating>0){
         document.querySelector("#avg-rating-number").textContent = roundedPercentageRating; 
     }
@@ -288,7 +339,12 @@ function updateButtons(){
 
 //This function removes all cards and then re-displays them with updated information
 function reloadAllCards(){
+    removeCards();
+    myLibrary.forEach(book=>libraryContainer.appendChild(book.newCard()));
+}
+
+//This function removes all cards
+function removeCards(){
     let cards = libraryContainer.querySelectorAll(".book-card")
     cards.forEach(card=>card.remove());
-    myLibrary.forEach(book=>libraryContainer.appendChild(book.newCard()));
 }
