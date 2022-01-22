@@ -75,6 +75,11 @@ button{
     flex-wrap: wrap;
     width: -webkit-fill-available;
 }
+@-moz-document url-prefix() {
+    #library-container{
+        width:-moz-available;
+    }
+}
 
 .book-card{
     display: flex;
@@ -103,7 +108,12 @@ button{
     text-decoration: underline;
     max-width: -webkit-fill-available;
     overflow-y: auto;
-
+}
+@-moz-document url-prefix() {
+    .book-title{
+        width:-moz-available;
+        text-align: center;
+    }
 }
 .book-author{
     font-size: 22px;
@@ -111,6 +121,12 @@ button{
     font-style: italic;
     max-width: -webkit-fill-available;
     overflow-y: auto;
+}
+@-moz-document url-prefix() {
+    .book-author{
+        width:-moz-available;
+        text-align: center;
+    }
 }
 .book-details{
     display: flex;
@@ -275,4 +291,9 @@ input[type="number" i] {
     
 ::-webkit-scrollbar-thumb:hover {
     background:#d6af66; 
+}
+@-moz-document url-prefix() {
+    body{
+        scrollbar-color: #eec373 #CA965C #d6af66;
+    }
 }

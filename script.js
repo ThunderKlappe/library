@@ -185,7 +185,7 @@ function addBook(){
         closeModal(modal);
     }
 }
-
+//This function toggles a book between read and unread
 function toggleBook(index, read){
     let modal = document.querySelector('#my-modal')
     read == "read" ? myLibrary[index].markRead() : myLibrary[index].markUnread();
