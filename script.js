@@ -35,6 +35,18 @@ const newBookModalHTML = `
         </div>
     </div>`;
 
+const clearLibraryModalHTML = `
+    <div class="modal-content">
+        <div class="modal-header">Clear Library</div>
+        <div class="modal-info-container">
+            <div class="modal-subtitle">Would you like to clear the entire library?</div>
+        </div>
+        <div class="book-buttons">
+            <button class="add-button" id="confirm-button">Clear Library</button>
+            <button class="delete-button" id ="cancel-button">Cancel</button>
+        </div>
+    </div>`;
+
 const confirmReadModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Mark this book as Read</div>
@@ -74,14 +86,14 @@ const confirmUnreadModalHTML = `
         </div>
     </div>`;
 
-const clearLibraryModalHTML = `
+const deleteBookModalHTML = `
     <div class="modal-content">
-        <div class="modal-header">Clear Library</div>
+        <div class="modal-header">Delete Book</div>
         <div class="modal-info-container">
-            <div class="modal-subtitle">Would you like to clear the entire library?</div>
+            <div class="modal-subtitle">Would you like to delete this book?</div>
         </div>
         <div class="book-buttons">
-            <button class="add-button" id="confirm-button">Clear Library</button>
+            <button class="add-button" id="confirm-button">Delete Book</button>
             <button class="delete-button" id ="cancel-button">Cancel</button>
         </div>
     </div>`;
@@ -146,6 +158,7 @@ Book.prototype.markUnread = function(){
     this.ratingNumber = "";
 }
 
+
 //******General Functions******
 
 //this function returns which star is selected
@@ -196,6 +209,22 @@ function addBook(){
         closeModal(modal);
     }
 }
+//function clears the library of any books
+function clearLibrary(){
+    clearErrors();
+    let modal = document.querySelector('#my-modal')
+    if(myLibrary.length == 0){
+        let libraryError = document.createElement('div');
+        libraryError.classList.add('error-message');
+        libraryError.textContent = 'Your Library is already empty';
+        modal.firstElementChild.insertBefore(libraryError, modal.firstElementChild.lastElementChild);
+    }else{
+        myLibrary.splice(0,myLibrary.length);
+        reloadAllCards();
+        updateCounts();
+        closeModal(modal)
+    }
+}
 //This function toggles a book between read and unread
 function toggleBook(index, read){
     clearErrors();
@@ -218,21 +247,14 @@ function toggleBook(index, read){
         closeModal(modal);
     }
 }
-//function clears the library of any books
-function clearLibrary(){
-    clearErrors();
-    let modal = document.querySelector('#my-modal')
-    if(myLibrary.length == 0){
-        let libraryError = document.createElement('div');
-        libraryError.classList.add('error-message');
-        libraryError.textContent = 'Your Library is already empty';
-        modal.firstElementChild.insertBefore(libraryError, modal.firstElementChild.lastElementChild);
-    }else{
-        myLibrary.splice(0,myLibrary.length);
-        reloadAllCards();
-        updateCounts();
-        closeModal(modal)
-    }
+//this function deletes a single book
+function deleteBook(index){
+    let modal = document.querySelector("#my-modal");
+    myLibrary.splice(index, 1);
+    reloadAllCards();
+    updateButtons();
+    updateCounts();
+    closeModal(modal);
 }
 
 //this function clears error messages
@@ -249,6 +271,12 @@ function newBookModal(){
     const addBookButton = document.querySelector("#confirm-add-book");
     addBookButton.addEventListener('click', addBook);
 }
+//this function makes the clear library modal
+function clearLibraryModal(){
+    makeModal(clearLibraryModalHTML);
+    const clearLibraryButton = document.querySelector("#confirm-button");
+    clearLibraryButton.addEventListener('click', clearLibrary);
+}
 
 //this function makes the confirm read modal appear
 function confirmReadModal(index){
@@ -262,12 +290,13 @@ function confirmUnreadModal(index){
     const unreadButton = document.querySelector("#confirm-button");
     unreadButton.addEventListener('click', ()=> toggleBook(index, "unread"));
 }
-//this function makes the clear library modal
-function clearLibraryModal(){
-    makeModal(clearLibraryModalHTML);
+//this function makes the delete book modal
+function deleteBookModal(index){
+    makeModal(deleteBookModalHTML);
     const clearLibraryButton = document.querySelector("#confirm-button");
-    clearLibraryButton.addEventListener('click', clearLibrary);
+    clearLibraryButton.addEventListener('click', ()=>deleteBook(index));
 }
+
 
 //This funtion takes in the type of modal being made and creates it
 function makeModal(type){
@@ -335,6 +364,12 @@ function updateButtons(){
         }
     });
     deleteBookButtons = libraryContainer.querySelectorAll(".delete-button");
+    deleteBookButtons.forEach((button, index) => {
+        if(button.getAttribute("listener") != "true"){
+            button.addEventListener('click', ()=>deleteBookModal(index));
+            button.setAttribute("listener","true");
+        }
+    });
 }
 
 //This function removes all cards and then re-displays them with updated information
