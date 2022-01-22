@@ -34,6 +34,7 @@ body{
     color: #2C3531;
     font-size: 24px;
     font-weight: 600;
+    justify-content: center;
 }
 #avg-rating{
     display: flex;
