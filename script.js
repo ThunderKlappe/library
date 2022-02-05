@@ -113,49 +113,50 @@ clearButton.addEventListener('click', clearLibraryModal);
 //*******Functions*******
 
 //this is the constructor to the book object
-function Book(title, author, pages, completed="Not Yet Completed", rating='', ratingNumber = 0){
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.completed = completed;
-    this.rating = rating;
-    this.ratingNumber = ratingNumber;
-}
-Book.prototype.newCard = function(){
-    let card = document.createElement('div');
-    card.classList.add('book-card');
-    card.innerHTML = `
-        <div class="book-upper">
-            <div class="book-header">
-                <div class="book-title">${this.title}</div>
-                <div class="book-author">${this.author}</div>
-            </div>
-            <div class="book-details">
-                <div class="book-pages">Pages: ${this.pages}</div>
-                <div class="book-completed">${this.completed}</div>
-                <div class="book-rating">${this.rating}</div>
-            </div>
-        </div>
-        <div class="book-buttons">
-            <button class="add-button">Mark as Read</button>
-            <button class="delete-button">Delete</button>
-        </div>`;
-    return card;
-
-}
-Book.prototype.markRead = function(){
-    let today = new Date();
-    this.completed = `Date Completed: ${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
-    this.rating = `Rating: `;
-    for(let i = 0; i<getStar(); i++){
-        this.rating += `&#9733`;
+class Book{
+    constructor(title, author, pages){
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.completed = "Not Yet Completed";
+        this.rating ='';
+        this.ratingNumber = 0;
     }
-    this.ratingNumber = getStar();
-}
-Book.prototype.markUnread = function(){
-    this.completed = "Not Yet Completed";
-    this.rating = "";
-    this.ratingNumber = "";
+    newCard(){
+        let card = document.createElement('div');
+        card.classList.add('book-card');
+        card.innerHTML = `
+            <div class="book-upper">
+                <div class="book-header">
+                    <div class="book-title">${this.title}</div>
+                    <div class="book-author">${this.author}</div>
+                </div>
+                <div class="book-details">
+                    <div class="book-pages">Pages: ${this.pages}</div>
+                    <div class="book-completed">${this.completed}</div>
+                    <div class="book-rating">${this.rating}</div>
+                </div>
+            </div>
+            <div class="book-buttons">
+                <button class="add-button">Mark as Read</button>
+                <button class="delete-button">Delete</button>
+            </div>`;
+        return card;
+    }
+    markRead(){
+        let today = new Date();
+        this.completed = `Date Completed: ${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
+        this.rating = `Rating: `;
+        for(let i = 0; i<getStar(); i++){
+            this.rating += `&#9733`;
+        }
+        this.ratingNumber = getStar();
+    }
+    markUnread(){
+        this.completed = "Not Yet Completed";
+        this.rating = "";
+        this.ratingNumber = "";
+    }
 }
 
 
