@@ -11,8 +11,65 @@ const clearButton = document.querySelector("#clear-library");
 let readBookButtons;
 let deleteBookButtons;
 
-//define block HTML code
-const newBookModalHTML = `
+let totalBooks = 0;
+let unreadBooks = 0;
+let readBooks = 0;
+
+
+//*******Functions*******
+
+//this is the constructor to the book object
+class Book{
+    constructor(title, author, pages){
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.completed = "Not Yet Completed";
+        this.rating ='';
+        this.ratingNumber = 0;
+    }
+    newCard(){
+        let card = document.createElement('div');
+        card.classList.add('book-card');
+        card.innerHTML = `
+            <div class="book-upper">
+                <div class="book-header">
+                    <div class="book-title">${this.title}</div>
+                    <div class="book-author">${this.author}</div>
+                </div>
+                <div class="book-details">
+                    <div class="book-pages">Pages: ${this.pages}</div>
+                    <div class="book-completed">${this.completed}</div>
+                    <div class="book-rating">${this.rating}</div>
+                </div>
+            </div>
+            <div class="book-buttons">
+                <button class="add-button">Mark as Read</button>
+                <button class="delete-button">Delete</button>
+            </div>`;
+        return card;
+    }
+    markRead(){
+        let today = new Date();
+        this.completed = `Date Completed: ${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
+        this.rating = `Rating: `;
+        for(let i = 0; i<getStar(); i++){
+            this.rating += `&#9733`;
+        }
+        this.ratingNumber = getStar();
+    }
+    markUnread(){
+        this.completed = "Not Yet Completed";
+        this.rating = "";
+        this.ratingNumber = "";
+    }
+}
+
+//******Modals******
+const Modal = (() => {
+
+    //define block HTML code
+    const newBookModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Add a Book</div>
         <div class="modal-info-container">
@@ -35,7 +92,7 @@ const newBookModalHTML = `
         </div>
     </div>`;
 
-const clearLibraryModalHTML = `
+    const clearLibraryModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Clear Library</div>
         <div class="modal-info-container">
@@ -47,7 +104,7 @@ const clearLibraryModalHTML = `
         </div>
     </div>`;
 
-const confirmReadModalHTML = `
+    const confirmReadModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Mark this book as Read</div>
         <div class="modal-info-container">
@@ -74,7 +131,7 @@ const confirmReadModalHTML = `
         </div>
     </div>`;
 
-const confirmUnreadModalHTML = `
+    const confirmUnreadModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Mark this book as Unread</div>
         <div class="modal-info-container">
@@ -86,7 +143,7 @@ const confirmUnreadModalHTML = `
         </div>
     </div>`;
 
-const deleteBookModalHTML = `
+    const deleteBookModalHTML = `
     <div class="modal-content">
         <div class="modal-header">Delete Book</div>
         <div class="modal-info-container">
@@ -98,65 +155,72 @@ const deleteBookModalHTML = `
         </div>
     </div>`;
 
+    //this function makes the New Book modal appear
+    function newBookModal(){
+        _makeModal(newBookModalHTML);
+        const addBookButton = document.querySelector("#confirm-add-book");
+        addBookButton.addEventListener('click', addBook);
+    }
+    //this function makes the clear library modal
+    function clearLibraryModal(){
+        _makeModal(clearLibraryModalHTML);
+        const clearLibraryButton = document.querySelector("#confirm-button");
+        clearLibraryButton.addEventListener('click', clearLibrary);
+    }
 
-let totalBooks = 0;
-let unreadBooks = 0;
-let readBooks = 0;
+    //this function makes the confirm read modal appear
+    function confirmReadModal(index){
+        _makeModal(confirmReadModalHTML);
+        const readButton = document.querySelector("#confirm-button");
+        readButton.addEventListener('click', ()=> toggleBook(index, "read"));
+    }
+    //this functions makes the confirm unread modal
+    function confirmUnreadModal(index){
+        _makeModal(confirmUnreadModalHTML);
+        const unreadButton = document.querySelector("#confirm-button");
+        unreadButton.addEventListener('click', ()=> toggleBook(index, "unread"));
+    }
+    //this function makes the delete book modal
+    function deleteBookModal(index){
+        _makeModal(deleteBookModalHTML);
+        const clearLibraryButton = document.querySelector("#confirm-button");
+        clearLibraryButton.addEventListener('click', ()=>deleteBook(index));
+    }
+
+     //this function closes a modal.
+     function closeModal(modal){
+        modal.classList.remove('modal-active');
+        setTimeout( () => modal.remove(), 200);
+    }
+
+
+    //This funtion takes in the type of modal being made and creates it
+    function _makeModal(type){
+        let modal = document.createElement('div');
+        modal.classList.add("modal");
+        modal.setAttribute("id", "my-modal")
+        modal.innerHTML = type;
+        document.body.appendChild(modal);
+        //needs timeout in order to create the modal and set the opacity to 0 before
+        //transitioning it for the animation
+        setTimeout(()=>_activateModal(modal), 1);
+    }
+
+    //this function makes the modal visible
+    function _activateModal(modal){
+        modal.classList.add('modal-active');
+        let cancelModalButton = document.querySelector("#cancel-button");
+        cancelModalButton.addEventListener('click', ()=>closeModal(modal));
+    }
+
+   
+
+    return {newBookModal, clearLibraryModal, confirmReadModal, confirmUnreadModal, deleteBookModal, closeModal}
+})();
 
 //event listeners to starting buttons
-addButton.addEventListener('click', newBookModal);
-clearButton.addEventListener('click', clearLibraryModal);
-
-
-
-
-//*******Functions*******
-
-//this is the constructor to the book object
-function Book(title, author, pages, completed="Not Yet Completed", rating='', ratingNumber = 0){
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.completed = completed;
-    this.rating = rating;
-    this.ratingNumber = ratingNumber;
-}
-Book.prototype.newCard = function(){
-    let card = document.createElement('div');
-    card.classList.add('book-card');
-    card.innerHTML = `
-        <div class="book-upper">
-            <div class="book-header">
-                <div class="book-title">${this.title}</div>
-                <div class="book-author">${this.author}</div>
-            </div>
-            <div class="book-details">
-                <div class="book-pages">Pages: ${this.pages}</div>
-                <div class="book-completed">${this.completed}</div>
-                <div class="book-rating">${this.rating}</div>
-            </div>
-        </div>
-        <div class="book-buttons">
-            <button class="add-button">Mark as Read</button>
-            <button class="delete-button">Delete</button>
-        </div>`;
-    return card;
-
-}
-Book.prototype.markRead = function(){
-    let today = new Date();
-    this.completed = `Date Completed: ${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
-    this.rating = `Rating: `;
-    for(let i = 0; i<getStar(); i++){
-        this.rating += `&#9733`;
-    }
-    this.ratingNumber = getStar();
-}
-Book.prototype.markUnread = function(){
-    this.completed = "Not Yet Completed";
-    this.rating = "";
-    this.ratingNumber = "";
-}
+addButton.addEventListener('click', Modal.newBookModal);
+clearButton.addEventListener('click', Modal.clearLibraryModal);
 
 
 //******General Functions******
@@ -206,7 +270,7 @@ function addBook(){
         libraryContainer.appendChild(myLibrary[myLibrary.length-1].newCard());
         updateCounts();
         updateButtons();
-        closeModal(modal);
+        Modal.closeModal(modal);
     }
 }
 //function clears the library of any books
@@ -222,7 +286,7 @@ function clearLibrary(){
         myLibrary.splice(0,myLibrary.length);
         reloadAllCards();
         updateCounts();
-        closeModal(modal)
+        Modal.closeModal(modal)
     }
 }
 //This function toggles a book between read and unread
@@ -244,7 +308,7 @@ function toggleBook(index, read){
             readBookButtons[bookNo].textContent = "Unread": false);
         updateButtons();
         updateCounts();
-        closeModal(modal);
+        Modal.closeModal(modal);
     }
 }
 //this function deletes a single book
@@ -254,7 +318,7 @@ function deleteBook(index){
     reloadAllCards();
     updateButtons();
     updateCounts();
-    closeModal(modal);
+    Modal.closeModal(modal);
 }
 
 //this function clears error messages
@@ -263,65 +327,7 @@ function clearErrors(){
     errorMessages.forEach(error => error.remove());
 }
 
-//******Modal Functions******
 
-//this function makes the New Book modal appear
-function newBookModal(){
-    makeModal(newBookModalHTML);
-    const addBookButton = document.querySelector("#confirm-add-book");
-    addBookButton.addEventListener('click', addBook);
-}
-//this function makes the clear library modal
-function clearLibraryModal(){
-    makeModal(clearLibraryModalHTML);
-    const clearLibraryButton = document.querySelector("#confirm-button");
-    clearLibraryButton.addEventListener('click', clearLibrary);
-}
-
-//this function makes the confirm read modal appear
-function confirmReadModal(index){
-    makeModal(confirmReadModalHTML);
-    const readButton = document.querySelector("#confirm-button");
-    readButton.addEventListener('click', ()=> toggleBook(index, "read"));
-}
-//this functions makes the confirm unread modal
-function confirmUnreadModal(index){
-    makeModal(confirmUnreadModalHTML);
-    const unreadButton = document.querySelector("#confirm-button");
-    unreadButton.addEventListener('click', ()=> toggleBook(index, "unread"));
-}
-//this function makes the delete book modal
-function deleteBookModal(index){
-    makeModal(deleteBookModalHTML);
-    const clearLibraryButton = document.querySelector("#confirm-button");
-    clearLibraryButton.addEventListener('click', ()=>deleteBook(index));
-}
-
-
-//This funtion takes in the type of modal being made and creates it
-function makeModal(type){
-    let modal = document.createElement('div');
-    modal.classList.add("modal");
-    modal.setAttribute("id", "my-modal")
-    modal.innerHTML = type;
-    document.body.appendChild(modal);
-    //needs timeout in order to create the modal and set the opacity to 0 before
-    //transitioning it for the animation
-    setTimeout(()=>activateModal(modal), 1);
-}
-
-//this function makes the modal visible
-function activateModal(modal){
-    modal.classList.add('modal-active');
-    let cancelModalButton = document.querySelector("#cancel-button");
-    cancelModalButton.addEventListener('click', ()=>closeModal(modal));
-}
-
-//this function closes a modal.
-function closeModal(modal){
-    modal.classList.remove('modal-active');
-    setTimeout( () => modal.remove(), 200);
-}
 
 //******Update Functions******
 
@@ -358,15 +364,15 @@ function updateButtons(){
     readBookButtons.forEach((button, index) => {
         if(button.getAttribute("listener") != "true"){
             button.textContent == "Mark as Read" ? 
-                button.addEventListener('click', ()=>confirmReadModal(index)):
-                button.addEventListener('click', ()=>confirmUnreadModal(index));
+                button.addEventListener('click', ()=>Modal.confirmReadModal(index)):
+                button.addEventListener('click', ()=>Modal.confirmUnreadModal(index));
             button.setAttribute("listener","true");
         }
     });
     deleteBookButtons = libraryContainer.querySelectorAll(".delete-button");
     deleteBookButtons.forEach((button, index) => {
         if(button.getAttribute("listener") != "true"){
-            button.addEventListener('click', ()=>deleteBookModal(index));
+            button.addEventListener('click', ()=>Modal.deleteBookModal(index));
             button.setAttribute("listener","true");
         }
     });
